@@ -2,8 +2,6 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from django.utils import timezone
-from bd_models.models import Player, BallInstance
-from Codes.models import RedeemCode
 
 class CodeModal(discord.ui.Modal, title="Enter Code"):
     code_input = discord.ui.TextInput(
@@ -14,6 +12,9 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
     )
 
     async def on_submit(self, interaction: discord.Interaction):
+        from bd_models.models import Player, BallInstance
+        from Codes.models import RedeemCode
+
         await interaction.response.defer(ephemeral=True)
         code = self.code_input.value.strip().upper()
 
