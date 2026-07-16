@@ -1,5 +1,0 @@
-[project]
-name = "Codes"
-version = "1.0.0"
-description = "Redeemable codes system for BallsDex"
-dependencies = []
