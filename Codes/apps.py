@@ -1,7 +1,6 @@
-cat > extra/Codes/Codes/apps.py << 'EOF'
 from django.apps import AppConfig
 
 class CodesConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
     name = "Codes"
     dpy_package = "Codes"
-EOF
