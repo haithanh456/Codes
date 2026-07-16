@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import RedeemCode
 
+
 @admin.register(RedeemCode)
 class RedeemCodeAdmin(admin.ModelAdmin):
     list_display = (
@@ -22,15 +23,16 @@ class RedeemCodeAdmin(admin.ModelAdmin):
         (None, {
             "fields": ("code", "reward_type", "is_active")
         }),
-        ("Countryball Reward", {
-            "fields": ("ball", "special"),
-            "description": "Only fill these if reward type is Countryball or Countryball + Special"
-        }),
-        ("Currency Reward", {
-            "fields": ("currency_amount",),
-            "description": "Only fill this if reward type is Currency (Coins)"
+        ("Rewards", {
+            "fields": ("ball", "special", "currency_amount"),
         }),
         ("Limits", {
             "fields": ("expires_at", "max_uses", "current_uses")
         }),
     )
+
+    def get_queryset(self, request):
+        try:
+            return super().get_queryset(request)
+        except:
+            return RedeemCode.objects.none()
