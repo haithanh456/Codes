@@ -21,30 +21,23 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
         try:
             redeem = await RedeemCode.objects.select_related("ball", "special").aget(code__iexact=code)
         except RedeemCode.DoesNotExist:
-            await interaction.followup.send("❌ Invalid code.", ephemeral=True)
+            await interaction.followup.send("❌ This code is invalid!", ephemeral=True)
             return
         except Exception:
             await interaction.followup.send("❌ Something went wrong.", ephemeral=True)
             return
 
-        if not redeem.is_active:
-            await interaction.followup.send("❌ This code is no longer active.", ephemeral=True)
-            return
-
-        if redeem.expires_at and redeem.expires_at < timezone.now():
-            await interaction.followup.send("sorry code has been expired", ephemeral=True)
+        if not redeem.is_active or (redeem.expires_at and redeem.expires_at < timezone.now()):
+            await interaction.followup.send("❌ This code has expired!", ephemeral=True)
             return
 
         if redeem.max_uses > 0 and redeem.current_uses >= redeem.max_uses:
-            await interaction.followup.send("❌ This code has reached its maximum uses.", ephemeral=True)
+            await interaction.followup.send("❌ This code has reached its maximum uses!", ephemeral=True)
             return
 
         player, _ = await Player.objects.aget_or_create(discord_id=interaction.user.id)
 
-        if redeem.reward_type in ["ball", "ball_special", "ball_currency"]:
-            if not redeem.ball:
-                await interaction.followup.send("❌ This code has no ball set.", ephemeral=True)
-                return
+        if redeem.ball:
             await BallInstance.objects.acreate(
                 player=player,
                 ball=redeem.ball,
@@ -54,11 +47,9 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
             ball_name = getattr(redeem.ball, 'country', str(redeem.ball))
             if redeem.special:
                 ball_name = f"{redeem.special.name} {ball_name}"
-            message = f"✅ Success! You received **{ball_name}**!"
-        elif redeem.reward_type == "currency":
-            message = f"✅ Success! You received **{redeem.currency_amount} coins**!"
+            message = f"✅ You have claimed **{ball_name}**!"
         else:
-            message = "❌ Unknown reward type."
+            message = f"✅ Code redeemed successfully!"
 
         redeem.current_uses += 1
         await redeem.asave()
