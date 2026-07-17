@@ -12,7 +12,6 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
     )
 
     async def on_submit(self, interaction: discord.Interaction):
-        # Import here (important!)
         from bd_models.models import Player, BallInstance
         from Codes.models import RedeemCode
 
