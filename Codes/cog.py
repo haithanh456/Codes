@@ -3,12 +3,13 @@ from discord import app_commands
 from discord.ext import commands
 from django.utils import timezone
 
-class CodeModal(discord.ui.Modal, title="Enter Code"):
+class CodeModal(discord.ui.Modal, title="Redeem Code"):
     code_input = discord.ui.TextInput(
-        label="Code",
+        label="Enter your code",
         placeholder="Type the code here...",
         required=True,
-        max_length=50
+        max_length=50,
+        style=discord.TextStyle.short
     )
 
     async def on_submit(self, interaction: discord.Interaction):
@@ -66,9 +67,9 @@ class CodesCog(commands.Cog):
         try:
             await interaction.response.send_modal(CodeModal())
         except discord.errors.NotFound:
-            await interaction.followup.send("❌ The interaction expired. Try again.", ephemeral=True)
+            await interaction.followup.send("❌ Interaction expired. Try again.", ephemeral=True)
         except Exception:
-            await interaction.followup.send("❌ Failed to open modal.", ephemeral=True)
+            await interaction.followup.send("❌ Failed to open redeem menu.", ephemeral=True)
 
 
 async def setup(bot):
