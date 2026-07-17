@@ -16,7 +16,7 @@ class CodesCog(commands.Cog):
         code = code.strip().upper()
 
         try:
-            redeem = await RedeemCode.objects.select_related("ball", "special").aget(code__iexact=code)
+            redeem = await RedeemCode.objects.aget(code__iexact=code)
         except RedeemCode.DoesNotExist:
             await interaction.response.send_message("❌ This code is invalid!", ephemeral=True)
             return
