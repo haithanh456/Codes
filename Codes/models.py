@@ -1,5 +1,4 @@
 from django.db import models
-from bd_models.models import Ball, Special
 
 class RedeemCode(models.Model):
     REWARD_TYPE_CHOICES = [
@@ -11,22 +10,8 @@ class RedeemCode(models.Model):
     code = models.CharField(max_length=50, unique=True)
     reward_type = models.CharField(max_length=20, choices=REWARD_TYPE_CHOICES, default="ball")
 
-    ball = models.ForeignKey(
-        Ball, 
-        on_delete=models.CASCADE, 
-        null=True, 
-        blank=True,
-        related_name="redeem_codes"
-    )
-    
-    special = models.ForeignKey(
-        Special, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True,
-        related_name="redeem_codes"
-    )
-
+    ball = models.CharField(max_length=100, blank=True, null=True, help_text="Type the ball name")
+    special = models.CharField(max_length=100, blank=True, null=True, help_text="Type the special name")
     currency_amount = models.PositiveIntegerField(default=0)
 
     expires_at = models.DateTimeField(null=True, blank=True)
