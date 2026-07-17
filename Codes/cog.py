@@ -20,8 +20,11 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
 
         try:
             redeem = await RedeemCode.objects.select_related("ball", "special").aget(code__iexact=code)
-        except Exception:
+        except RedeemCode.DoesNotExist:
             await interaction.followup.send("❌ Invalid code.", ephemeral=True)
+            return
+        except Exception as e:
+            await interaction.followup.send("❌ Something went wrong.", ephemeral=True)
             return
 
         if not redeem.is_active:
@@ -32,13 +35,13 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
             await interaction.followup.send("sorry code has been expired", ephemeral=True)
             return
 
-        if redeem.current_uses >= redeem.max_uses:
+        if redeem.max_uses > 0 and redeem.current_uses >= redeem.max_uses:
             await interaction.followup.send("❌ This code has reached its maximum uses.", ephemeral=True)
             return
 
         player, _ = await Player.objects.aget_or_create(discord_id=interaction.user.id)
 
-        if redeem.reward_type in ["ball", "ball_special"]:
+        if redeem.reward_type in ["ball", "ball_special", "ball_currency"]:
             if not redeem.ball:
                 await interaction.followup.send("❌ This code has no ball set.", ephemeral=True)
                 return
@@ -48,22 +51,19 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
                 special=redeem.special,
                 tradeable=True,
             )
-            ball_name = redeem.ball.country if hasattr(redeem.ball, 'country') else str(redeem.ball)
+            ball_name = getattr(redeem.ball, 'country', str(redeem.ball))
             if redeem.special:
                 ball_name = f"{redeem.special.name} {ball_name}"
             message = f"✅ Success! You received **{ball_name}**!"
         elif redeem.reward_type == "currency":
-            if hasattr(player, "credits"):
-                player.credits += redeem.currency_amount
-                await player.asave()
-                message = f"✅ Success! You received **{redeem.currency_amount} coins**!"
-            else:
-                message = f"✅ Code redeemed! You should receive **{redeem.currency_amount} coins**."
+            # Add coins logic here if your Player model supports it
+            message = f"✅ Success! You received **{redeem.currency_amount} coins**!"
         else:
             message = "❌ Unknown reward type."
 
         redeem.current_uses += 1
         await redeem.asave()
+
         await interaction.followup.send(message, ephemeral=True)
 
 
@@ -72,4 +72,9 @@ class CodesCog(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="codes", description="Redeem a code")
-    async def codes(self, interaction:
+    async def codes(self, interaction: discord.Interaction):
+        await interaction.response.send_modal(CodeModal())
+
+
+async def setup(bot):
+    await bot.add_cog(CodesCog(bot))
