@@ -48,7 +48,7 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
                 special=redeem.special,
                 tradeable=True,
             )
-            ball_name = redeem.ball.country
+            ball_name = redeem.ball.country if hasattr(redeem.ball, 'country') else str(redeem.ball)
             if redeem.special:
                 ball_name = f"{redeem.special.name} {ball_name}"
             message = f"✅ Success! You received **{ball_name}**!"
@@ -72,16 +72,4 @@ class CodesCog(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="codes", description="Redeem a code")
-    async def codes(self, interaction: discord.Interaction):
-        await interaction.response.send_modal(CodeModal())
-
-    # Add this temporary sync command
-    @app_commands.command(name="sync", description="Sync commands (use once)")
-    async def sync(self, interaction: discord.Interaction):
-        await interaction.response.defer()
-        await self.bot.tree.sync()
-        await interaction.followup.send("✅ Commands synced successfully!")
-
-
-async def setup(bot):
-    await bot.add_cog(CodesCog(bot))
+    async def codes(self, interaction:
