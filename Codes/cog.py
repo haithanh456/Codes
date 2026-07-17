@@ -42,20 +42,16 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
             if not redeem.ball:
                 await interaction.followup.send("❌ This code has no ball set.", ephemeral=True)
                 return
-
             await BallInstance.objects.acreate(
                 player=player,
                 ball=redeem.ball,
                 special=redeem.special,
                 tradeable=True,
             )
-
             ball_name = redeem.ball.country
             if redeem.special:
                 ball_name = f"{redeem.special.name} {ball_name}"
-
             message = f"✅ Success! You received **{ball_name}**!"
-
         elif redeem.reward_type == "currency":
             if hasattr(player, "credits"):
                 player.credits += redeem.currency_amount
@@ -68,8 +64,8 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
 
         redeem.current_uses += 1
         await redeem.asave()
-
         await interaction.followup.send(message, ephemeral=True)
+
 
 class CodesCog(commands.Cog):
     def __init__(self, bot):
@@ -78,6 +74,14 @@ class CodesCog(commands.Cog):
     @app_commands.command(name="codes", description="Redeem a code")
     async def codes(self, interaction: discord.Interaction):
         await interaction.response.send_modal(CodeModal())
+
+    # Add this temporary sync command
+    @app_commands.command(name="sync", description="Sync commands (use once)")
+    async def sync(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        await self.bot.tree.sync()
+        await interaction.followup.send("✅ Commands synced successfully!")
+
 
 async def setup(bot):
     await bot.add_cog(CodesCog(bot))
