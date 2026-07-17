@@ -3,21 +3,18 @@ from discord import app_commands
 from discord.ext import commands
 from django.utils import timezone
 
-class CodeModal(discord.ui.Modal, title="Redeem Code"):
-    code_input = discord.ui.TextInput(
-        label="Enter your code",
-        placeholder="Type the code here...",
-        required=True,
-        max_length=50,
-        style=discord.TextStyle.short
-    )
+class CodesCog(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
-    async def on_submit(self, interaction: discord.Interaction):
+    @app_commands.command(name="code", description="Redeem a code")
+    @app_commands.describe(code="The redeem code")
+    async def code(self, interaction: discord.Interaction, code: str):
         from bd_models.models import Player, BallInstance
         from Codes.models import RedeemCode
 
         await interaction.response.defer(ephemeral=True)
-        code = self.code_input.value.strip().upper()
+        code = code.strip().upper()
 
         try:
             redeem = await RedeemCode.objects.select_related("ball", "special").aget(code__iexact=code)
@@ -48,28 +45,14 @@ class CodeModal(discord.ui.Modal, title="Redeem Code"):
             ball_name = getattr(redeem.ball, 'country', str(redeem.ball))
             if redeem.special:
                 ball_name = f"{redeem.special.name} {ball_name}"
-            message = f"✅ You have claimed **{ball_name}**!"
+            message = f"✅ You have claimed **{ball_name}** using code `{code}`!"
         else:
-            message = f"✅ Code redeemed successfully!"
+            message = f"✅ Code `{code}` redeemed successfully!"
 
         redeem.current_uses += 1
         await redeem.asave()
 
         await interaction.followup.send(message, ephemeral=True)
-
-
-class CodesCog(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-
-    @app_commands.command(name="codes", description="Redeem a code")
-    async def codes(self, interaction: discord.Interaction):
-        try:
-            await interaction.response.send_modal(CodeModal())
-        except discord.errors.NotFound:
-            await interaction.followup.send("❌ Interaction expired. Try again.", ephemeral=True)
-        except Exception:
-            await interaction.followup.send("❌ Failed to open redeem menu.", ephemeral=True)
 
 
 async def setup(bot):
