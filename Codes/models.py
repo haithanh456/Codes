@@ -1,10 +1,8 @@
 from django.db import models
-from bd_models.models import Ball, Special
 
 class RedeemCode(models.Model):
     code = models.CharField(max_length=50, unique=True)
-    ball = models.ForeignKey(Ball, on_delete=models.SET_NULL, null=True, blank=True)
-    special = models.ForeignKey(Special, on_delete=models.SET_NULL, null=True, blank=True)
+    reward = models.CharField(max_length=200, help_text="Example: Germany or 500 coins")
     expires_at = models.DateTimeField(null=True, blank=True)
     max_uses = models.PositiveIntegerField(default=1)
     current_uses = models.PositiveIntegerField(default=0)
