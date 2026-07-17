@@ -23,7 +23,7 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
         except RedeemCode.DoesNotExist:
             await interaction.followup.send("❌ Invalid code.", ephemeral=True)
             return
-        except Exception as e:
+        except Exception:
             await interaction.followup.send("❌ Something went wrong.", ephemeral=True)
             return
 
@@ -56,7 +56,6 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
                 ball_name = f"{redeem.special.name} {ball_name}"
             message = f"✅ Success! You received **{ball_name}**!"
         elif redeem.reward_type == "currency":
-            # Add coins logic here if your Player model supports it
             message = f"✅ Success! You received **{redeem.currency_amount} coins**!"
         else:
             message = "❌ Unknown reward type."
@@ -71,12 +70,12 @@ class CodesCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-      @app_commands.command(name="codes", description="Redeem a code")
+    @app_commands.command(name="codes", description="Redeem a code")
     async def codes(self, interaction: discord.Interaction):
         try:
             await interaction.response.send_modal(CodeModal())
         except discord.errors.NotFound:
-            pass  # interaction expired
+            pass
 
 
 async def setup(bot):
