@@ -71,9 +71,12 @@ class CodesCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @app_commands.command(name="codes", description="Redeem a code")
+      @app_commands.command(name="codes", description="Redeem a code")
     async def codes(self, interaction: discord.Interaction):
-        await interaction.response.send_modal(CodeModal())
+        try:
+            await interaction.response.send_modal(CodeModal())
+        except discord.errors.NotFound:
+            pass  # interaction expired
 
 
 async def setup(bot):
