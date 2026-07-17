@@ -63,11 +63,12 @@ class CodesCog(commands.Cog):
 
     @app_commands.command(name="codes", description="Redeem a code")
     async def codes(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True, thinking=True)
         try:
-            await interaction.followup.send_modal(CodeModal())
+            await interaction.response.send_modal(CodeModal())
+        except discord.errors.NotFound:
+            await interaction.followup.send("❌ The interaction expired. Try again.", ephemeral=True)
         except Exception:
-            await interaction.followup.send("❌ Failed to open the modal.", ephemeral=True)
+            await interaction.followup.send("❌ Failed to open modal.", ephemeral=True)
 
 
 async def setup(bot):
