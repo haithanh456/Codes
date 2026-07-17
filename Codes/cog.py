@@ -12,6 +12,7 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
     )
 
     async def on_submit(self, interaction: discord.Interaction):
+        # Import here (important!)
         from bd_models.models import Player, BallInstance
         from Codes.models import RedeemCode
 
@@ -20,7 +21,7 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
 
         try:
             redeem = await RedeemCode.objects.select_related("ball", "special").aget(code__iexact=code)
-        except RedeemCode.DoesNotExist:
+        except Exception:
             await interaction.followup.send("❌ Invalid code.", ephemeral=True)
             return
 
@@ -48,7 +49,7 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
         redeem.current_uses += 1
         await redeem.asave()
 
-        ball_name = redeem.ball.country
+        ball_name = redeem.ball.country if redeem.ball else "Unknown"
         if redeem.special:
             ball_name = f"{redeem.special.name} {ball_name}"
 
