@@ -38,24 +38,38 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
 
         player, _ = await Player.objects.aget_or_create(discord_id=interaction.user.id)
 
-        await BallInstance.objects.acreate(
-            player=player,
-            ball=redeem.ball,
-            special=redeem.special,
-            tradeable=True,
-        )
+        if redeem.reward_type in ["ball", "ball_special"]:
+            if not redeem.ball:
+                await interaction.followup.send("❌ This code has no ball set.", ephemeral=True)
+                return
+
+            await BallInstance.objects.acreate(
+                player=player,
+                ball=redeem.ball,
+                special=redeem.special,
+                tradeable=True,
+            )
+
+            ball_name = redeem.ball.country
+            if redeem.special:
+                ball_name = f"{redeem.special.name} {ball_name}"
+
+            message = f"✅ Success! You received **{ball_name}**!"
+
+        elif redeem.reward_type == "currency":
+            if hasattr(player, "credits"):
+                player.credits += redeem.currency_amount
+                await player.asave()
+                message = f"✅ Success! You received **{redeem.currency_amount} coins**!"
+            else:
+                message = f"✅ Code redeemed! You should receive **{redeem.currency_amount} coins**."
+        else:
+            message = "❌ Unknown reward type."
 
         redeem.current_uses += 1
         await redeem.asave()
 
-        ball_name = redeem.ball.country if redeem.ball else "Unknown"
-        if redeem.special:
-            ball_name = f"{redeem.special.name} {ball_name}"
-
-        await interaction.followup.send(
-            f"✅ Success! You received **{ball_name}**!",
-            ephemeral=True
-        )
+        await interaction.followup.send(message, ephemeral=True)
 
 class CodesCog(commands.Cog):
     def __init__(self, bot):
