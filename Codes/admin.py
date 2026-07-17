@@ -15,4 +15,4 @@ class RedeemCodeAdmin(admin.ModelAdmin):
 
     def deactivate(self, request, queryset):
         queryset.update(is_active=False)
-   
+    deactivate.short_description = "Deactivate selected codes"
