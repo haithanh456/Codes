@@ -41,7 +41,7 @@ class CodesCog(commands.Cog):
                 special=redeem.special,
                 tradeable=True,
             )
-            ball_name = getattr(redeem.ball, 'country', str(redeem.ball))
+            ball_name = redeem.ball.country if hasattr(redeem.ball, 'country') else str(redeem.ball)
             if redeem.special:
                 ball_name = f"{redeem.special.name} {ball_name}"
             message = f"✅ You have claimed **{ball_name}** using code `{code}`!"
