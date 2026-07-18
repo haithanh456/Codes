@@ -1,3 +1,4 @@
+cat > extra/Codes/Codes/admin.py << 'EOF'
 from django.contrib import admin
 from .models import RedeemCode
 
@@ -7,7 +8,7 @@ class RedeemCodeAdmin(admin.ModelAdmin):
     list_filter = ("is_active",)
     search_fields = ("code",)
     list_editable = ("is_active",)
-    autocomplete_fields = ("ball", "special")   
+    autocomplete_fields = ("ball", "special")   # ← This turns the nice search boxes back on
 
     fieldsets = (
         (None, {
@@ -20,3 +21,4 @@ class RedeemCodeAdmin(admin.ModelAdmin):
             "fields": ("expires_at", "max_uses", "current_uses")
         }),
     )
+EOF
