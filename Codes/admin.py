@@ -1,4 +1,3 @@
-cat > extra/Codes/Codes/admin.py << 'EOF'
 from django.contrib import admin
 from .models import RedeemCode
 
@@ -21,4 +20,3 @@ class RedeemCodeAdmin(admin.ModelAdmin):
             "fields": ("expires_at", "max_uses", "current_uses")
         }),
     )
-EOF
