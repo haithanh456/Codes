@@ -8,7 +8,7 @@ class RedeemCodeAdmin(admin.ModelAdmin):
     list_filter = ("is_active",)
     search_fields = ("code",)
     list_editable = ("is_active",)
-    autocomplete_fields = ("ball", "special")   # ← This turns the nice search boxes back on
+    autocomplete_fields = ("ball", "special")
 
     fieldsets = (
         (None, {
