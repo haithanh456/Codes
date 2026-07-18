@@ -13,25 +13,24 @@ class CodesCog(commands.Cog):
         from bd_models.models import Player, BallInstance
         from Codes.models import RedeemCode
 
-        await interaction.response.defer(ephemeral=True)
         code = code.strip().upper()
 
         try:
             redeem = await RedeemCode.objects.select_related("ball", "special").aget(code__iexact=code)
         except RedeemCode.DoesNotExist:
-            await interaction.followup.send("code doesnt exist", ephemeral=True)
+            await interaction.response.send_message("code doesnt exist", ephemeral=True)
             return
 
         if not redeem.is_active:
-            await interaction.followup.send("code doesnt exist anymore", ephemeral=True)
+            await interaction.response.send_message("code doesnt exist anymore", ephemeral=True)
             return
 
         if redeem.expires_at and redeem.expires_at < timezone.now():
-            await interaction.followup.send("code doesnt exist anymore", ephemeral=True)
+            await interaction.response.send_message("code doesnt exist anymore", ephemeral=True)
             return
 
         if redeem.current_uses >= redeem.max_uses:
-            await interaction.followup.send("code doesnt exist anymore", ephemeral=True)
+            await interaction.response.send_message("code doesnt exist anymore", ephemeral=True)
             return
 
         player, _ = await Player.objects.aget_or_create(discord_id=interaction.user.id)
@@ -53,7 +52,7 @@ class CodesCog(commands.Cog):
         redeem.current_uses += 1
         await redeem.asave()
 
-        await interaction.followup.send(message, ephemeral=True)
+        await interaction.response.send_message(message, ephemeral=True)
 
 async def setup(bot):
     await bot.add_cog(CodesCog(bot))
