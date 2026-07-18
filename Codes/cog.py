@@ -73,7 +73,13 @@ class CodesCog(commands.Cog):
 
     @app_commands.command(name="codes", description="Redeem a code")
     async def codes(self, interaction: discord.Interaction):
-        await interaction.response.send_modal(CodeModal())
+        try:
+            await interaction.response.send_modal(CodeModal())
+        except discord.errors.HTTPException as e:
+            if e.code == 40060:  # Interaction already acknowledged
+                pass  # Ignore this error
+            else:
+                await interaction.followup.send("❌ Something went wrong. Please try again.", ephemeral=True)
 
     @app_commands.command(name="sync", description="Force sync commands")
     async def sync(self, interaction: discord.Interaction):
@@ -86,6 +92,5 @@ class CodesCog(commands.Cog):
 
 
 async def setup(bot):
-    cog = CodesCog(bot)
-    await bot.add_cog(cog)
-    print("✅ Codes Cog loaded successfully!")
+    await bot.add_cog(CodesCog(bot))
+    print("✅ Codes package loaded successfully!")
