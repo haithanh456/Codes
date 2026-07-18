@@ -20,9 +20,6 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
 
         try:
             redeem = await RedeemCode.objects.aget(code__iexact=code)
-        except RedeemCode.DoesNotExist:
-            await interaction.followup.send("❌ Code doesn't exist.", ephemeral=True)
-            return
         except Exception:
             await interaction.followup.send("❌ Code doesn't exist.", ephemeral=True)
             return
@@ -78,16 +75,17 @@ class CodesCog(commands.Cog):
     async def codes(self, interaction: discord.Interaction):
         await interaction.response.send_modal(CodeModal())
 
-    # Force Sync Command
-    @app_commands.command(name="sync", description="Force sync commands (use this if /codes doesn't appear)")
+    @app_commands.command(name="sync", description="Force sync commands")
     async def sync(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
         try:
-            await self.bot.tree.sync()
-            await interaction.followup.send("✅ Commands synced successfully! Try /codes now.", ephemeral=True)
+            synced = await self.bot.tree.sync()
+            await interaction.followup.send(f"✅ Synced {len(synced)} commands! Try /codes now.", ephemeral=True)
         except Exception as e:
             await interaction.followup.send(f"❌ Sync failed: {e}", ephemeral=True)
 
 
 async def setup(bot):
-    await bot.add_cog(CodesCog(bot))
+    cog = CodesCog(bot)
+    await bot.add_cog(cog)
+    print("✅ Codes Cog loaded successfully!")
