@@ -13,7 +13,9 @@ class CodesCog(commands.Cog):
         from bd_models.models import Player, BallInstance
         from Codes.models import RedeemCode
 
-        await interaction.response.defer(ephemeral=True)
+        # Important: Respond immediately to avoid 40060 error
+        await interaction.response.defer(ephemeral=True, thinking=False)
+
         code = code.strip().upper()
 
         try:
@@ -22,7 +24,6 @@ class CodesCog(commands.Cog):
             await interaction.followup.send("❌ Code doesn't exist.", ephemeral=True)
             return
 
-        # Hide expired and inactive codes
         if not redeem.is_active or (redeem.expires_at and redeem.expires_at < timezone.now()):
             await interaction.followup.send("❌ Code doesn't exist.", ephemeral=True)
             return
@@ -62,7 +63,6 @@ class CodesCog(commands.Cog):
         else:
             message = "❌ Code doesn't exist."
 
-        # Update usage
         redeem.current_uses += 1
         await redeem.asave()
 
