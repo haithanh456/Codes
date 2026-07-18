@@ -38,7 +38,7 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
 
         player, _ = await Player.objects.aget_or_create(discord_id=interaction.user.id)
 
-        # Give reward
+        # Give the selected ball + special
         if redeem.ball:
             await BallInstance.objects.acreate(
                 player=player,
