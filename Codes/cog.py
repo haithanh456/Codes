@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from django.utils import timezone
+from asgiref.sync import sync_to_async
 
 class CodesCog(commands.Cog):
     def __init__(self, bot):
@@ -13,13 +14,14 @@ class CodesCog(commands.Cog):
         from bd_models.models import Player, BallInstance
         from Codes.models import RedeemCode
 
-        # Defer immediately to prevent "Unknown interaction"
+        # Immediate response to prevent timeout
         await interaction.response.defer(ephemeral=True)
 
         code = code.strip().upper()
 
+        # Use sync_to_async to avoid long async database delay
         try:
-            redeem = await RedeemCode.objects.aget(code__iexact=code)
+            redeem = await sync_to_async(RedeemCode.objects.get)(code__iexact=code)
         except Exception:
             await interaction.followup.send("❌ Code doesn't exist.", ephemeral=True)
             return
@@ -32,14 +34,14 @@ class CodesCog(commands.Cog):
             await interaction.followup.send("❌ This code has reached its maximum uses.", ephemeral=True)
             return
 
-        player, _ = await Player.objects.aget_or_create(discord_id=interaction.user.id)
+        player, _ = await sync_to_async(Player.objects.get_or_create)(discord_id=interaction.user.id)
 
         if redeem.reward_type in ["ball", "ball_special"]:
             if not redeem.ball:
                 await interaction.followup.send("❌ Code doesn't exist.", ephemeral=True)
                 return
 
-            await BallInstance.objects.acreate(
+            await sync_to_async(BallInstance.objects.create)(
                 player=player,
                 ball=redeem.ball,
                 special=redeem.special,
@@ -56,7 +58,7 @@ class CodesCog(commands.Cog):
         elif redeem.reward_type == "currency":
             if hasattr(player, "credits"):
                 player.credits += redeem.currency_amount
-                await player.asave()
+                await sync_to_async(player.save)()
                 message = f"✅ You claimed: **{redeem.currency_amount} coins**!"
             else:
                 message = f"✅ You claimed: **{redeem.currency_amount} coins**!"
@@ -64,7 +66,7 @@ class CodesCog(commands.Cog):
             message = "❌ Code doesn't exist."
 
         redeem.current_uses += 1
-        await redeem.asave()
+        await sync_to_async(redeem.save)()
 
         await interaction.followup.send(message, ephemeral=True)
 
