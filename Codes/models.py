@@ -1,3 +1,4 @@
+cat > extra/Codes/Codes/models.py << 'EOF'
 from django.db import models
 from bd_models.models import Ball, Special
 
@@ -17,3 +18,4 @@ class RedeemCode(models.Model):
     class Meta:
         verbose_name = "Redeem Code"
         verbose_name_plural = "Redeem Codes"
+EOF
