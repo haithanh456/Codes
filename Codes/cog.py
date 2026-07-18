@@ -13,8 +13,8 @@ class CodesCog(commands.Cog):
         from bd_models.models import Player, BallInstance
         from Codes.models import RedeemCode
 
-        # Important: Respond immediately to avoid 40060 error
-        await interaction.response.defer(ephemeral=True, thinking=False)
+        # Defer immediately to prevent "Unknown interaction"
+        await interaction.response.defer(ephemeral=True)
 
         code = code.strip().upper()
 
