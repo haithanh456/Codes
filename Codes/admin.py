@@ -7,3 +7,16 @@ class RedeemCodeAdmin(admin.ModelAdmin):
     list_filter = ("is_active",)
     search_fields = ("code",)
     list_editable = ("is_active",)
+    raw_id_fields = ("ball", "special")   
+
+    fieldsets = (
+        (None, {
+            "fields": ("code", "is_active")
+        }),
+        ("Reward", {
+            "fields": ("ball", "special", "currency_amount"),
+        }),
+        ("Limits", {
+            "fields": ("expires_at", "max_uses", "current_uses")
+        }),
+    )
