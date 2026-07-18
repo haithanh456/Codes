@@ -18,7 +18,6 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
         await interaction.response.defer(ephemeral=True)
         code = self.code_input.value.strip().upper()
 
-        # Try to find the code
         try:
             redeem = await RedeemCode.objects.aget(code__iexact=code)
         except RedeemCode.DoesNotExist:
@@ -28,7 +27,6 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
             await interaction.followup.send("❌ Code doesn't exist.", ephemeral=True)
             return
 
-        # Code exists but we hide some information
         if not redeem.is_active or (redeem.expires_at and redeem.expires_at < timezone.now()):
             await interaction.followup.send("❌ Code doesn't exist.", ephemeral=True)
             return
@@ -37,7 +35,6 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
             await interaction.followup.send("❌ This code has reached its maximum uses.", ephemeral=True)
             return
 
-        # Valid code → Give reward
         player, _ = await Player.objects.aget_or_create(discord_id=interaction.user.id)
 
         if redeem.reward_type in ["ball", "ball_special"]:
@@ -55,8 +52,8 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
             ball_name = redeem.ball
             if redeem.special:
                 ball_name = f"{redeem.special} {ball_name}"
-
-            message = f"✅ Success! You received **{ball_name}**!"
+            rarity_text = f" ({redeem.rarity})" if hasattr(redeem, 'rarity') and redeem.rarity else ""
+            message = f"✅ Success! You received **{ball_name}**{rarity_text}!"
 
         elif redeem.reward_type == "currency":
             if hasattr(player, "credits"):
@@ -68,10 +65,8 @@ class CodeModal(discord.ui.Modal, title="Enter Code"):
         else:
             message = "❌ Code doesn't exist."
 
-        # Update uses
         redeem.current_uses += 1
         await redeem.asave()
-
         await interaction.followup.send(message, ephemeral=True)
 
 
@@ -83,11 +78,15 @@ class CodesCog(commands.Cog):
     async def codes(self, interaction: discord.Interaction):
         await interaction.response.send_modal(CodeModal())
 
-    @app_commands.command(name="sync", description="Sync commands")
+    # Force Sync Command
+    @app_commands.command(name="sync", description="Force sync commands (use this if /codes doesn't appear)")
     async def sync(self, interaction: discord.Interaction):
-        await interaction.response.defer()
-        await self.bot.tree.sync()
-        await interaction.followup.send("✅ Commands synced!", ephemeral=True)
+        await interaction.response.defer(ephemeral=True)
+        try:
+            await self.bot.tree.sync()
+            await interaction.followup.send("✅ Commands synced successfully! Try /codes now.", ephemeral=True)
+        except Exception as e:
+            await interaction.followup.send(f"❌ Sync failed: {e}", ephemeral=True)
 
 
 async def setup(bot):
