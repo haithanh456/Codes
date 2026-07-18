@@ -3,7 +3,7 @@ from .models import RedeemCode
 
 @admin.register(RedeemCode)
 class RedeemCodeAdmin(admin.ModelAdmin):
-    list_display = ['code', 'reward_type', 'is_active', 'current_uses', 'max_uses', 'expires_at']
+    list_display = ['code', 'reward_type', 'ball', 'special', 'currency_amount', 'is_active', 'current_uses', 'max_uses']
     list_filter = ['is_active', 'reward_type']
     search_fields = ['code']
     list_editable = ['is_active']
