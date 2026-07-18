@@ -6,6 +6,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
+        ('bd_models', '0001_initial'),   
     ]
 
     operations = [
@@ -14,7 +15,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=50, unique=True)),
-                ('reward_type', models.CharField(choices=[('ball', 'Countryball'), ('ball_special', 'Countryball + Special'), ('currency', 'Currency (Coins)')], default='ball', max_length=20)),
+                ('reward_type', models.CharField(max_length=20, choices=[('ball', 'Countryball'), ('ball_special', 'Countryball + Special'), ('currency', 'Currency (Coins)')], default='ball')),
                 ('ball', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='bd_models.Ball')),
                 ('special', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='bd_models.Special')),
                 ('currency_amount', models.PositiveIntegerField(default=0)),
